@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detecta tus oportunidades de IA</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #EC0000;
+    --red-light: #fff0f0;
+    --bg: #F7F6F3;
+    --white: #FFFFFF;
+    --gray-100: #F0EFEC;
+    --gray-200: #E2E1DC;
+    --gray-400: #A8A69E;
+    --gray-600: #6B6962;
+    --gray-900: #1A1916;
+    --radius: 20px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.07);
+    --shadow-lg: 0 12px 48px rgba(0,0,0,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--gray-900);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--gray-200);
+    z-index: 100;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--red);
+    transition: width 0.6s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* HEADER */
+  .header {
+    padding: 32px 40px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--gray-900);
+    letter-spacing: -0.3px;
+  }
+  .step-indicator {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-400);
+    letter-spacing: 0.5px;
+  }
+
+  /* MAIN CONTAINER */
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* STEP */
+  .step { display: none; animation: fadeUp 0.5s ease forwards; }
+  .step.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* STEP HEADER */
+  .step-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gray-100);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gray-600);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .step-tag .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--red);
+  }
+
+  .step-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 5vw, 40px);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+    color: var(--gray-900);
+  }
+
+  .step-subtitle {
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--gray-600);
+    line-height: 1.6;
+    margin-bottom: 40px;
+    max-width: 540px;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+    border: 1px solid transparent;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .card:focus-within {
+    border-color: var(--red);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gray-400);
+    margin-bottom: 10px;
+  }
+
+  .card-question {
+    font-size: 17px;
+    font-weight: 400;
+    color: var(--gray-900);
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  textarea {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--gray-900);
+    background: var(--gray-100);
+    border-radius: 12px;
+    padding: 14px 16px;
+    resize: none;
+    min-height: 90px;
+    line-height: 1.6;
+    transition: background 0.2s;
+  }
+  textarea:focus { background: var(--bg); }
+  textarea::placeholder { color: var(--gray-400); }
+
+  /* BUTTONS */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--red);
+    color: white;
+    border: none;
+    border-radius: 100px;
+    padding: 16px 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    margin-top: 32px;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(236,0,0,0.25); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--gray-600);
+    border: 1.5px solid var(--gray-200);
+    border-radius: 100px;
+    padding: 14px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    margin-top: 32px;
+    margin-right: 12px;
+  }
+  .btn-secondary:hover { border-color: var(--gray-400); color: var(--gray-900); }
+
+  .arrow { font-size: 18px; }
+
+  /* MAP STEP */
+  .map-instructions {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .map-instructions .icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+  .map-instructions p { font-size: 14px; color: var(--gray-600); line-height: 1.6; }
+  .map-instructions strong { color: var(--gray-900); font-weight: 500; }
+
+  .map-wrapper {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 32px;
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+
+  .map-container {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    background: var(--gray-100);
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: crosshair;
+  }
+
+  .axis-label {
+    position: absolute;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--gray-400);
+  }
+  .axis-x-low { bottom: 10px; left: 16px; }
+  .axis-x-high { bottom: 10px; right: 16px; }
+  .axis-y-low { top: 16px; left: 10px; writing-mode: vertical-rl; transform: rotate(180deg); }
+  .axis-y-high { bottom: 16px; left: 10px; writing-mode: vertical-rl; transform: rotate(180deg); }
+
+  .axis-line-x {
+    position: absolute;
+    bottom: 30px; left: 40px; right: 16px;
+    height: 1px;
+    background: var(--gray-200);
+  }
+  .axis-line-y {
+    position: absolute;
+    left: 30px; top: 16px; bottom: 40px;
+    width: 1px;
+    background: var(--gray-200);
+  }
+
+  /* Quadrant labels */
+  .quadrant-label {
+    position: absolute;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--gray-200);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  .map-point {
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: grab;
+    transform: translate(-50%, -50%);
+    transition: box-shadow 0.15s, transform 0.1s;
+    box-shadow: 0 2px 8px rgba(236,0,0,0.3);
+    z-index: 10;
+    user-select: none;
+  }
+  .map-point:hover { box-shadow: 0 4px 16px rgba(236,0,0,0.4); transform: translate(-50%, -50%) scale(1.1); }
+  .map-point.dragging { cursor: grabbing; transform: translate(-50%, -50%) scale(1.15); box-shadow: 0 8px 24px rgba(236,0,0,0.4); }
+
+  .map-point-label {
+    position: absolute;
+    background: var(--gray-900);
+    color: white;
+    font-size: 11px;
+    font-weight: 400;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    transform: translate(-50%, -140%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .map-point:hover .map-point-label { opacity: 1; }
+
+  .items-list {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .item-chip {
+    background: var(--gray-100);
+    border-radius: 100px;
+    padding: 7px 14px;
+    font-size: 13px;
+    color: var(--gray-600);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .item-chip .chip-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--red);
+    flex-shrink: 0;
+  }
+
+  /* DIAGNOSTICO */
+  .diagnosis-selector {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+  }
+  .diagnosis-selector label {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--gray-400);
+    display: block;
+    margin-bottom: 10px;
+  }
+  .diagnosis-selector select {
+    width: 100%;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--gray-900);
+    background: var(--white);
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A8A69E' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+  }
+  .diagnosis-selector select:focus { border-color: var(--red); }
+
+  .filter-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+  .filter-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .filter-subtitle {
+    font-size: 13px;
+    color: var(--gray-400);
+    margin-bottom: 24px;
+  }
+
+  .filter-question {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .filter-question:last-of-type { border-bottom: none; }
+  .filter-question p { font-size: 15px; line-height: 1.5; flex: 1; }
+
+  .toggle-group { display: flex; gap: 8px; flex-shrink: 0; }
+  .toggle-btn {
+    padding: 7px 16px;
+    border-radius: 100px;
+    border: 1.5px solid var(--gray-200);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    background: white;
+    color: var(--gray-600);
+    transition: all 0.15s;
+  }
+  .toggle-btn.yes.active { background: #e8f5e9; border-color: #4caf50; color: #2e7d32; }
+  .toggle-btn.no.active { background: var(--red-light); border-color: var(--red); color: var(--red); }
+
+  .idoneity-result {
+    margin-top: 20px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    display: none;
+  }
+  .idoneity-result.good { background: #e8f5e9; color: #2e7d32; display: block; }
+  .idoneity-result.bad { background: var(--red-light); color: var(--red); display: block; }
+
+  /* ANATOMY */
+  .anatomy-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+  .anatomy-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .anatomy-subtitle {
+    font-size: 13px;
+    color: var(--gray-400);
+    margin-bottom: 20px;
+  }
+
+  .step-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .step-input {
+    flex: 1;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--gray-900);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .step-input:focus { border-color: var(--red); }
+
+  .energy-select {
+    border: 1.5px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 10px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    outline: none;
+    cursor: pointer;
+    background: white;
+    transition: border-color 0.2s;
+  }
+  .energy-select:focus { border-color: var(--red); }
+
+  .add-step-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: 1.5px dashed var(--gray-200);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--gray-400);
+    cursor: pointer;
+    width: 100%;
+    margin-top: 4px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .add-step-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* RESULTS */
+  .result-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+  .result-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--red-light);
+    color: var(--red);
+    border-radius: 100px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .result-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .result-item:last-child { border-bottom: none; }
+  .result-emoji { font-size: 20px; }
+  .result-text { font-size: 15px; color: var(--gray-900); }
+  .result-meta { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+
+  /* SPLASH */
+  .splash {
+    text-align: center;
+    padding: 60px 24px;
+  }
+  .splash-icon {
+    font-size: 56px;
+    margin-bottom: 24px;
+    display: block;
+  }
+  .splash-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 6vw, 52px);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+  .splash-subtitle {
+    font-size: 17px;
+    font-weight: 300;
+    color: var(--gray-600);
+    line-height: 1.7;
+    max-width: 480px;
+    margin: 0 auto 40px;
+  }
+  .splash-steps {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-bottom: 48px;
+    flex-wrap: wrap;
+  }
+  .splash-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .splash-step-num {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-600);
+  }
+  .splash-step-name {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--gray-400);
+  }
+
+  /* FINAL */
+  .final-hero {
+    text-align: center;
+    padding: 40px 0 32px;
+  }
+  .final-icon { font-size: 48px; margin-bottom: 16px; display: block; }
+  .final-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .final-subtitle { font-size: 16px; color: var(--gray-600); font-weight: 300; }
+
+  .opportunity-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    box-shadow: var(--shadow);
+    margin-bottom: 12px;
+    border-left: 3px solid var(--red);
+  }
+  .opp-task { font-size: 13px; color: var(--gray-400); margin-bottom: 4px; }
+  .opp-step { font-size: 16px; font-weight: 500; color: var(--gray-900); }
+
+  @media (max-width: 600px) {
+    .header { padding: 20px 20px 0; }
+    .container { padding: 32px 16px 60px; }
+    .map-wrapper { padding: 20px 16px; }
+    .splash-steps { gap: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="header">
+  <div class="logo">IA · Oportunidades</div>
+  <div class="step-indicator" id="stepIndicator"></div>
+</div>
+
+<div class="container">
+
+  <!-- SPLASH -->
+  <div class="step active" id="step-splash">
+    <div class="splash">
+      <span class="splash-icon">🔍</span>
+      <h1 class="splash-title">Encuentra dónde<br>puede ayudarte la IA</h1>
+      <p class="splash-subtitle">Un proceso de tres pasos para identificar las oportunidades reales en tu trabajo, sin necesitar saber nada de inteligencia artificial.</p>
+      <div class="splash-steps">
+        <div class="splash-step">
+          <div class="splash-step-num">1</div>
+          <div class="splash-step-name">Apertura</div>
+        </div>
+        <div class="splash-step">
+          <div class="splash-step-num">2</div>
+          <div class="splash-step-name">Clasificación</div>
+        </div>
+        <div class="splash-step">
+          <div class="splash-step-num">3</div>
+          <div class="splash-step-name">Diagnóstico</div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="goTo('step-1')">Empezar <span class="arrow">→</span></button>
+      <div style="margin-top:16px;">
+        <button onclick="downloadPDF()" style="display:inline-flex;align-items:center;gap:8px;background:transparent;border:1.5px solid var(--gray-200);border-radius:100px;padding:12px 24px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--gray-600);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--gray-200)';this.style.color='var(--gray-600)'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar versión imprimible (PDF)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 1: APERTURA -->
+  <div class="step" id="step-1">
+    <div class="step-tag"><span class="dot"></span>Paso 1 de 3</div>
+    <h2 class="step-title">Apertura</h2>
+    <p class="step-subtitle">Responde cada pregunta por separado. No busques la respuesta correcta. Escribe lo primero que te venga a la mente.</p>
+
+    <div class="card">
+      <div class="card-label">Pregunta 01</div>
+      <div class="card-question">¿Qué parte de tu semana laboral cambiarías si pudieras?</div>
+      <textarea id="q1" placeholder="Escribe aquí sin filtros..." rows="3"></textarea>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Pregunta 02</div>
+      <div class="card-question">¿Qué es lo que más te pesa cuando piensas en tu trabajo del día a día?</div>
+      <textarea id="q2" placeholder="Escribe aquí sin filtros..." rows="3"></textarea>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Pregunta 03</div>
+      <div class="card-question">Lista todas las tareas de tu semana que merecerían hacerse de otra forma. Cuantas más, mejor. No hay respuesta incorrecta — el único error es quedarse corto.</div>
+      <textarea id="q3" placeholder="Escribe aquí sin filtros..." rows="3"></textarea>
+    </div>
+
+    <button class="btn-primary" onclick="goToMap()">Continuar <span class="arrow">→</span></button>
+  </div>
+
+  <!-- STEP 2: CLASIFICACIÓN -->
+  <div class="step" id="step-2">
+    <div class="step-tag"><span class="dot"></span>Paso 2 de 3</div>
+    <h2 class="step-title">Clasificación</h2>
+    <p class="step-subtitle">Coloca cada situación en el mapa según su frecuencia y la energía que te genera. Haz clic en el mapa para colocar los puntos.</p>
+
+    <div class="map-instructions">
+      <span class="icon">💡</span>
+      <p>Si una tarea tiene partes que te energizan y partes que te drenan, colócala <strong>en la zona media del eje vertical</strong>. En el paso 3 la desmenuzaremos.</p>
+    </div>
+
+    <div class="map-wrapper">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div style="font-size:13px; color:var(--gray-600);">Selecciona una situación y haz clic en el mapa para posicionarla</div>
+      </div>
+
+      <!-- Item selector -->
+      <div class="items-list" id="mapItemsList"></div>
+
+      <div style="height:16px;"></div>
+
+      <!-- Map -->
+      <div style="position:relative; padding-left:36px; padding-bottom:36px;">
+        <!-- Y axis label -->
+        <div style="position:absolute; left:0; top:0; bottom:36px; display:flex; flex-direction:column; justify-content:space-between; align-items:center; width:30px;">
+          <span style="font-size:10px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; color:var(--gray-400); writing-mode:vertical-rl; transform:rotate(180deg);">Te da energía / te motiva</span>
+          <span style="font-size:10px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; color:var(--gray-400); writing-mode:vertical-rl; transform:rotate(180deg);">Te quita energía / te pesa</span>
+        </div>
+        <!-- X axis label -->
+        <div style="position:absolute; bottom:0; left:36px; right:0; display:flex; justify-content:space-between;">
+          <span style="font-size:10px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; color:var(--gray-400);">Baja frecuencia</span>
+          <span style="font-size:10px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; color:var(--gray-400);">Alta frecuencia</span>
+        </div>
+
+        <div class="map-container" id="mapCanvas" onclick="placePoint(event)">
+          <!-- Grid lines -->
+          <div style="position:absolute; left:50%; top:0; bottom:0; width:1px; background:var(--gray-200); opacity:0.5;"></div>
+          <div style="position:absolute; top:50%; left:0; right:0; height:1px; background:var(--gray-200); opacity:0.5;"></div>
+          <!-- Points will be added here -->
+        </div>
+      </div>
+
+      <div id="mapPointsList" style="margin-top:16px;"></div>
+    </div>
+
+    <div style="display:flex; flex-wrap:wrap;">
+      <button class="btn-secondary" onclick="goTo('step-1')">← Atrás</button>
+      <button class="btn-primary" onclick="goToDiagnosis()">Continuar <span class="arrow">→</span></button>
+    </div>
+  </div>
+
+  <!-- STEP 3: DIAGNÓSTICO -->
+  <div class="step" id="step-3">
+    <div class="step-tag"><span class="dot"></span>Paso 3 de 3</div>
+    <h2 class="step-title">Diagnóstico</h2>
+    <p class="step-subtitle">Analiza las situaciones candidatas. Empieza por las que están en la zona de alta frecuencia y energía negativa.</p>
+
+    <!-- Task selector -->
+    <div class="diagnosis-selector">
+      <label>Situación a analizar</label>
+      <select id="diagnosisSelect" onchange="loadDiagnosis()">
+      </select>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-card" id="filterCard">
+      <div class="filter-title">Filtro de idoneidad</div>
+      <div class="filter-subtitle">Responde sí o no a cada pregunta sobre esta situación</div>
+
+      <div class="filter-question">
+        <p>¿Se repite de forma parecida cada vez que la haces?</p>
+        <div class="toggle-group">
+          <button class="toggle-btn yes" onclick="toggleFilter(this, 'f1', true)">Sí</button>
+          <button class="toggle-btn no" onclick="toggleFilter(this, 'f1', false)">No</button>
+        </div>
+      </div>
+      <div class="filter-question">
+        <p>¿Tiene un resultado claro y verificable?</p>
+        <div class="toggle-group">
+          <button class="toggle-btn yes" onclick="toggleFilter(this, 'f2', true)">Sí</button>
+          <button class="toggle-btn no" onclick="toggleFilter(this, 'f2', false)">No</button>
+        </div>
+      </div>
+      <div class="filter-question">
+        <p>¿Sabes exactamente qué información necesitas para empezar y qué tiene que producir cuando terminas?</p>
+        <div class="toggle-group">
+          <button class="toggle-btn yes" onclick="toggleFilter(this, 'f3', true)">Sí</button>
+          <button class="toggle-btn no" onclick="toggleFilter(this, 'f3', false)">No</button>
+        </div>
+      </div>
+
+      <div class="idoneity-result" id="idoneityResult"></div>
+    </div>
+
+    <!-- Anatomy -->
+    <div class="anatomy-card" id="anatomyCard">
+      <div class="anatomy-title">Anatomía de la tarea</div>
+      <div class="anatomy-subtitle">Desglosa el proceso y marca la energía que te genera cada paso</div>
+
+      <div style="margin-bottom:20px;">
+        <div style="font-size:12px; font-weight:500; letter-spacing:0.8px; text-transform:uppercase; color:var(--gray-400); margin-bottom:10px;">¿Qué entra?</div>
+        <textarea id="anatomy-in" placeholder="¿Qué información o material necesitas para empezar?" style="min-height:60px;"></textarea>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <div style="font-size:12px; font-weight:500; letter-spacing:0.8px; text-transform:uppercase; color:var(--gray-400); margin-bottom:10px;">¿Qué haces? <span style="font-weight:400; text-transform:none; letter-spacing:0; font-size:11px; color:var(--gray-400);">— marca la energía de cada paso</span></div>
+        <div id="stepsContainer"></div>
+        <button class="add-step-btn" onclick="addStep()">+ Añadir paso</button>
+      </div>
+
+      <div>
+        <div style="font-size:12px; font-weight:500; letter-spacing:0.8px; text-transform:uppercase; color:var(--gray-400); margin-bottom:10px;">¿Qué sale?</div>
+        <textarea id="anatomy-out" placeholder="¿Cuál es el resultado final?" style="min-height:60px;"></textarea>
+      </div>
+    </div>
+
+    <div style="display:flex; flex-wrap:wrap;">
+      <button class="btn-secondary" onclick="goTo('step-2')">← Atrás</button>
+      <button class="btn-primary" onclick="goToResults()">Ver resultados <span class="arrow">→</span></button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="step" id="step-results">
+    <div class="final-hero">
+      <span class="final-icon">✦</span>
+      <h2 class="final-title">Tus oportunidades de IA</h2>
+      <p class="final-subtitle">Estos son los pasos concretos donde la IA puede entrar<br>sin tocar lo que ya funciona bien.</p>
+    </div>
+    <div id="resultsContainer"></div>
+    <button class="btn-primary" onclick="restart()" style="margin-top:8px;">Empezar de nuevo</button>
+    <div style="margin-top:12px;">
+      <button onclick="downloadPDF()" style="display:inline-flex;align-items:center;gap:8px;background:transparent;border:1.5px solid var(--gray-200);border-radius:100px;padding:12px 24px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--gray-600);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--gray-200)';this.style.color='var(--gray-600)'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Descargar versión imprimible (PDF)
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// State
+const state = {
+  q1: '', q2: '', q3: '',
+  items: [],
+  mapPoints: {},
+  filters: {},
+  anatomy: {},
+  selectedItem: null,
+  pendingMapItem: null
+};
+
+let stepOrder = ['step-splash', 'step-1', 'step-2', 'step-3', 'step-results'];
+let currentStep = 'step-splash';
+
+function goTo(stepId) {
+  document.getElementById(currentStep).classList.remove('active');
+  document.getElementById(stepId).classList.add('active');
+  currentStep = stepId;
+  updateProgress();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function updateProgress() {
+  const idx = stepOrder.indexOf(currentStep);
+  const pct = (idx / (stepOrder.length - 1)) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  const labels = ['', 'Paso 1 · Apertura', 'Paso 2 · Clasificación', 'Paso 3 · Diagnóstico', 'Resultados'];
+  document.getElementById('stepIndicator').textContent = labels[idx] || '';
+}
+
+// STEP 1 → 2
+function goToMap() {
+  // Extract items from textarea responses
+  const texts = [
+    document.getElementById('q1').value,
+    document.getElementById('q2').value,
+    document.getElementById('q3').value
+  ];
+
+  // Parse items: split by newlines or commas
+  let items = [];
+  texts.forEach(t => {
+    if (!t.trim()) return;
+    const parts = t.split(/[\n,;]+/).map(s => s.trim()).filter(s => s.length > 2);
+    items.push(...parts);
+  });
+
+  // Deduplicate and limit
+  items = [...new Set(items)].slice(0, 12);
+  if (items.length === 0) items = ['Mi primera situación'];
+
+  state.items = items;
+  state.mapPoints = {};
+  renderMapItems();
+  goTo('step-2');
+}
+
+function renderMapItems() {
+  const list = document.getElementById('mapItemsList');
+  list.innerHTML = '';
+  state.items.forEach((item, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'item-chip';
+    chip.style.cursor = 'pointer';
+    chip.dataset.idx = i;
+    const placed = state.mapPoints[i];
+    chip.innerHTML = `<span class="chip-dot" style="background:${placed ? '#4caf50' : 'var(--red)'}"></span>${item.substring(0,30)}${item.length>30?'…':''}`;
+    chip.onclick = () => selectMapItem(i, chip);
+    if (state.pendingMapItem === i) chip.style.outline = '2px solid var(--red)';
+    list.appendChild(chip);
+  });
+  renderMapPoints();
+}
+
+function selectMapItem(idx, chip) {
+  state.pendingMapItem = idx;
+  document.querySelectorAll('.item-chip').forEach(c => c.style.outline = 'none');
+  chip.style.outline = '2px solid var(--red)';
+}
+
+function placePoint(e) {
+  if (state.pendingMapItem === null) {
+    // Select first unplaced
+    for (let i = 0; i < state.items.length; i++) {
+      if (!state.mapPoints[i]) { state.pendingMapItem = i; break; }
+    }
+    if (state.pendingMapItem === null) return;
+  }
+
+  const canvas = document.getElementById('mapCanvas');
+  const rect = canvas.getBoundingClientRect();
+  const x = ((e.clientX - rect.left) / rect.width) * 100;
+  const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+  state.mapPoints[state.pendingMapItem] = { x, y };
+  state.pendingMapItem = null;
+  renderMapItems();
+}
+
+function renderMapPoints() {
+  const canvas = document.getElementById('mapCanvas');
+  // Remove old points
+  canvas.querySelectorAll('.map-point').forEach(p => p.remove());
+
+  Object.entries(state.mapPoints).forEach(([idx, pos]) => {
+    const item = state.items[idx];
+    const pt = document.createElement('div');
+    pt.className = 'map-point';
+    pt.style.left = pos.x + '%';
+    pt.style.top = pos.y + '%';
+    pt.textContent = parseInt(idx) + 1;
+    pt.innerHTML = `${parseInt(idx)+1}<span class="map-point-label">${item.substring(0,24)}</span>`;
+    canvas.appendChild(pt);
+  });
+
+  // Legend
+  const legend = document.getElementById('mapPointsList');
+  legend.innerHTML = '';
+  if (Object.keys(state.mapPoints).length > 0) {
+    legend.innerHTML = '<div style="font-size:12px; color:var(--gray-400); margin-bottom:8px; font-weight:500; letter-spacing:0.5px; text-transform:uppercase;">Posicionadas</div>';
+    Object.entries(state.mapPoints).forEach(([idx, pos]) => {
+      const item = state.items[idx];
+      const score = (pos.x / 100) * 0.5 + ((100 - pos.y) / 100) * 0.5; // higher = more priority
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--gray-100);font-size:13px;';
+      row.innerHTML = `<span style="width:20px;height:20px;border-radius:50%;background:var(--red);color:white;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0">${parseInt(idx)+1}</span><span style="color:var(--gray-900)">${item}</span>`;
+      legend.appendChild(row);
+    });
+  }
+}
+
+// STEP 2 → 3
+function goToDiagnosis() {
+  // Sort items by priority (high frequency + low energy = top left on map where y is high, x is high)
+  const sorted = Object.entries(state.mapPoints).map(([idx, pos]) => ({
+    idx: parseInt(idx),
+    item: state.items[idx],
+    priority: (pos.x / 100) * 0.6 + ((100 - pos.y) / 100) * 0.4
+  })).sort((a, b) => b.priority - a.priority);
+
+  // Add unplaced items at end
+  state.items.forEach((item, i) => {
+    if (!state.mapPoints[i]) sorted.push({ idx: i, item, priority: 0 });
+  });
+
+  const sel = document.getElementById('diagnosisSelect');
+  sel.innerHTML = '';
+  sorted.forEach(({ idx, item }) => {
+    const opt = document.createElement('option');
+    opt.value = idx;
+    opt.textContent = item;
+    sel.appendChild(opt);
+  });
+
+  // Init steps
+  initSteps();
+  resetFilters();
+  goTo('step-3');
+}
+
+function loadDiagnosis() {
+  resetFilters();
+  initSteps();
+}
+
+function resetFilters() {
+  state.filters = {};
+  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('idoneityResult').className = 'idoneity-result';
+  document.getElementById('idoneityResult').textContent = '';
+}
+
+function toggleFilter(btn, key, val) {
+  const group = btn.closest('.toggle-group');
+  group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.filters[key] = val;
+  evaluateFilter();
+}
+
+function evaluateFilter() {
+  const vals = Object.values(state.filters);
+  if (vals.length < 3) return;
+  const yeses = vals.filter(v => v).length;
+  const result = document.getElementById('idoneityResult');
+  if (yeses >= 2) {
+    result.className = 'idoneity-result good';
+    result.textContent = '✓ Buena candidata para explorar con IA. Continúa con la anatomía.';
+  } else {
+    result.className = 'idoneity-result bad';
+    result.textContent = '✗ Esta situación puede no ser la más adecuada ahora. Prueba con la siguiente del mapa.';
+  }
+}
+
+function initSteps() {
+  const container = document.getElementById('stepsContainer');
+  container.innerHTML = '';
+  addStep();
+  addStep();
+  addStep();
+  document.getElementById('anatomy-in').value = '';
+  document.getElementById('anatomy-out').value = '';
+}
+
+function addStep() {
+  const container = document.getElementById('stepsContainer');
+  const row = document.createElement('div');
+  row.className = 'step-row';
+  row.innerHTML = `
+    <input class="step-input" type="text" placeholder="Describe este paso...">
+    <select class="energy-select" title="Energía">
+      <option value="">·</option>
+      <option value="positive">⚡</option>
+      <option value="neutral">➡️</option>
+      <option value="negative">🔋</option>
+    </select>
+    <button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--gray-400);padding:4px;">×</button>
+  `;
+  container.appendChild(row);
+}
+
+// Results
+function goToResults() {
+  // Collect drain steps
+  const stepRows = document.querySelectorAll('#stepsContainer .step-row');
+  const selectedTask = document.getElementById('diagnosisSelect');
+  const taskName = selectedTask ? selectedTask.options[selectedTask.selectedIndex]?.text : 'Tarea';
+
+  const opportunities = [];
+  stepRows.forEach(row => {
+    const input = row.querySelector('.step-input');
+    const energy = row.querySelector('.energy-select');
+    if (input?.value && energy?.value === 'negative') {
+      opportunities.push({ task: taskName, step: input.value });
+    }
+  });
+
+  const container = document.getElementById('resultsContainer');
+  container.innerHTML = '';
+
+  if (opportunities.length === 0) {
+    container.innerHTML = `<div class="result-card"><p style="color:var(--gray-600);font-size:15px;">No has marcado pasos que te quiten energía aún. Vuelve al diagnóstico y etiqueta los pasos con 🔋.</p></div>`;
+  } else {
+    opportunities.forEach(opp => {
+      const card = document.createElement('div');
+      card.className = 'opportunity-card';
+      card.innerHTML = `
+        <div class="opp-task">${opp.task}</div>
+        <div class="opp-step">🔋 ${opp.step}</div>
+      `;
+      container.appendChild(card);
+    });
+
+    const note = document.createElement('div');
+    note.style.cssText = 'margin-top:20px;padding:20px;background:var(--gray-100);border-radius:16px;font-size:14px;color:var(--gray-600);line-height:1.6;';
+    note.innerHTML = `<strong style="color:var(--gray-900)">Próximo paso →</strong> Estos pasos son tus candidatos reales para explorar herramientas de IA. El objetivo no es automatizar tu trabajo, sino liberarte de lo que te drena para enfocarte en lo que aporta valor.`;
+    container.appendChild(note);
+  }
+
+  goTo('step-results');
+}
+
+function restart() {
+  state.items = [];
+  state.mapPoints = {};
+  state.filters = {};
+  state.pendingMapItem = null;
+  document.getElementById('q1').value = '';
+  document.getElementById('q2').value = '';
+  document.getElementById('q3').value = '';
+  goTo('step-splash');
+}
+
+// Init
+updateProgress();
+</script>
+
+  <script>
+    const PDF_B64 = "JVBERi0xLjQKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgKG9wZW5zb3VyY2UpCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiAzIDAgUiAvRjMgNiAwIFIgL0Y0IDggMCBSCj4+CmVuZG9iagoyIDAgb2JqCjw8Ci9CYXNlRm9udCAvSGVsdmV0aWNhIC9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nIC9OYW1lIC9GMSAvU3VidHlwZSAvVHlwZTEgL1R5cGUgL0ZvbnQKPj4KZW5kb2JqCjMgMCBvYmoKPDwKL0Jhc2VGb250IC9IZWx2ZXRpY2EtQm9sZCAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjIgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iago0IDAgb2JqCjw8Ci9Db250ZW50cyAxMyAwIFIgL01lZGlhQm94IFsgMCAwIDU5NS4yNzU2IDg0MS44ODk4IF0gL1BhcmVudCAxMiAwIFIgL1Jlc291cmNlcyA8PAovRm9udCAxIDAgUiAvUHJvY1NldCBbIC9QREYgL1RleHQgL0ltYWdlQiAvSW1hZ2VDIC9JbWFnZUkgXQo+PiAvUm90YXRlIDAgL1RyYW5zIDw8Cgo+PiAKICAvVHlwZSAvUGFnZQo+PgplbmRvYmoKNSAwIG9iago8PAovQ29udGVudHMgMTQgMCBSIC9NZWRpYUJveCBbIDAgMCA1OTUuMjc1NiA4NDEuODg5OCBdIC9QYXJlbnQgMTIgMCBSIC9SZXNvdXJjZXMgPDwKL0ZvbnQgMSAwIFIgL1Byb2NTZXQgWyAvUERGIC9UZXh0IC9JbWFnZUIgL0ltYWdlQyAvSW1hZ2VJIF0KPj4gL1JvdGF0ZSAwIC9UcmFucyA8PAoKPj4gCiAgL1R5cGUgL1BhZ2UKPj4KZW5kb2JqCjYgMCBvYmoKPDwKL0Jhc2VGb250IC9aYXBmRGluZ2JhdHMgL05hbWUgL0YzIC9TdWJ0eXBlIC9UeXBlMSAvVHlwZSAvRm9udAo+PgplbmRvYmoKNyAwIG9iago8PAovQ29udGVudHMgMTUgMCBSIC9NZWRpYUJveCBbIDAgMCA1OTUuMjc1NiA4NDEuODg5OCBdIC9QYXJlbnQgMTIgMCBSIC9SZXNvdXJjZXMgPDwKL0ZvbnQgMSAwIFIgL1Byb2NTZXQgWyAvUERGIC9UZXh0IC9JbWFnZUIgL0ltYWdlQyAvSW1hZ2VJIF0KPj4gL1JvdGF0ZSAwIC9UcmFucyA8PAoKPj4gCiAgL1R5cGUgL1BhZ2UKPj4KZW5kb2JqCjggMCBvYmoKPDwKL0Jhc2VGb250IC9TeW1ib2wgL05hbWUgL0Y0IC9TdWJ0eXBlIC9UeXBlMSAvVHlwZSAvRm9udAo+PgplbmRvYmoKOSAwIG9iago8PAovQ29udGVudHMgMTYgMCBSIC9NZWRpYUJveCBbIDAgMCA1OTUuMjc1NiA4NDEuODg5OCBdIC9QYXJlbnQgMTIgMCBSIC9SZXNvdXJjZXMgPDwKL0ZvbnQgMSAwIFIgL1Byb2NTZXQgWyAvUERGIC9UZXh0IC9JbWFnZUIgL0ltYWdlQyAvSW1hZ2VJIF0KPj4gL1JvdGF0ZSAwIC9UcmFucyA8PAoKPj4gCiAgL1R5cGUgL1BhZ2UKPj4KZW5kb2JqCjEwIDAgb2JqCjw8Ci9QYWdlTW9kZSAvVXNlTm9uZSAvUGFnZXMgMTIgMCBSIC9UeXBlIC9DYXRhbG9nCj4+CmVuZG9iagoxMSAwIG9iago8PAovQXV0aG9yIChhbm9ueW1vdXMpIC9DcmVhdGlvbkRhdGUgKEQ6MjAyNjA0MjUxODAyNTcrMDAnMDAnKSAvQ3JlYXRvciAoYW5vbnltb3VzKSAvS2V5d29yZHMgKCkgL01vZERhdGUgKEQ6MjAyNjA0MjUxODAyNTcrMDAnMDAnKSAvUHJvZHVjZXIgKFJlcG9ydExhYiBQREYgTGlicmFyeSAtIFwob3BlbnNvdXJjZVwpKSAKICAvU3ViamVjdCAodW5zcGVjaWZpZWQpIC9UaXRsZSAoRnJhbWV3b3JrIElBIFwyNjcgT3BvcnR1bmlkYWRlcykgL1RyYXBwZWQgL0ZhbHNlCj4+CmVuZG9iagoxMiAwIG9iago8PAovQ291bnQgNCAvS2lkcyBbIDQgMCBSIDUgMCBSIDcgMCBSIDkgMCBSIF0gL1R5cGUgL1BhZ2VzCj4+CmVuZG9iagoxMyAwIG9iago8PAovRmlsdGVyIFsgL0FTQ0lJODVEZWNvZGUgL0ZsYXRlRGVjb2RlIF0gL0xlbmd0aCAxNDE2Cj4+CnN0cmVhbQpHYXRuJjk1aVREJkJGOD0nUVwpMkAvLDBqU10hKWVacDU0PkVscyolXDtnV21cPFhGTElKU3QxLFpRcExQOEslQHApYkxBXztDMmApLFU2Pm80TjFJR15ZKkQ1O0hVZCVTJ29pODMkTUsyaHJwQ1srM3EzWTBwLitYNVpsMGtqUFtjSCpfT0tFMiw2bGFiW0BNNjZHLlwmaVhoV2g+R0BqWDstPG1YKSwlcC1uOmBAZ0QzOEhkZ1FNKSgzTmswZHFbVCRdPm01JGFaVidZP2VuKT9YY1kjK1ssWzB0Mld0RVZFJmJaRURvM0VsZERMMkg/R1BNVSorIik2KE8kIWAwbE4hNWZUMkIlV0k1ZjBOVmZAaTNfITdITiskPF5WQE4rZTIoQThtJSQ0Wi5QbzZcKG8tIjokLjcxWkkySUY4WyZMcUxsaCEhRzRxW1VvIlhNUE1MbT5aTjJpOVo0WUlKK19OM2Nua1FDYiI9LE9UNltVVHVOUHUkLEdscy9NPGE3NEpFIi9sVGBFRi85RGhDLFM1TSVgYzEkKyQhZCItV1NsVC49JSdsc0xrMyFmJERwJyo4WEwpMDo7RUFHT3QzLTMoLSVSTUpRLiFAJkMobFdVaUdbVWRERFcwPV9EdHFUZj9OTzwyZClMbkw7Yl9SYTlcRV0ySDhpJ1ZRTU0uOVZuZCY+XydQYWZoTD4uQVM1cyNTUmY9bzI4SkJRWEcnaThQPklJcCdQQyhXbGM2RyVULzBaU247aHRFaTYlTTgvPi48MlJlaUdfNUY/Y3MvamhaZWk5M2tqUlBLaTdNJXFkRUVKJGMuJiNeXCRuRj5mWkJFbWczZFpESkhvYmMpKDlwXGJJMT9Obm4lWWxpbHQiIUdySjInRShoJFhYXEc+SUc3UCgiJWwvOjQkQGlwSkVVUlZdZVVuazAzKiZDQmxPTGRoYGtiU0lOMWktTiYnXV4nW1g+YT8zTT1SR1dQXDJSSD8+KGozUyYjNT5udUA0Jjc4dERTcTpiLlhSTlBlXlo9R3EsUXVaPm88RTlhcDhMbExAPi9uNSVbWl1OIWstaE1pb3BxVW9AMG87MkhkO0ZDRUxvclozSWZOU0A7YVtzbzIwMks0VlI7K2ZULF01ckFmLHQpckRgM20kaU0mXCVzXGUtPDx1SF9RR2tBOis5PFBbUixaOiJZOT45LTwvLFM7czozZGdfPi9mLnVFdHEnc3FVKmRwP11sTzUyQUw1LnBca2kxPUMtY3FeUGoyMmZfby89aGRXPls6SyhZVT9RJzRfa3IvNkpFdT5aJ1FFRmswbk9LL2gnOmBjS25DRWNcLVUuXWdWZzlqNnNQY25tUUA3cGU3Pi47YGlAMDQ1Vjc+aThHTmIzXi1KRXEzQiwzT2dvaD1pJGtJI0taaTsjI2ZATFBObio2RUEoXURQa1txL2NmTEhBMW1rZ108alRTPFhoTSdwSSZJLDFdbUJOaDNoNS8kWltnayJmTC1tLVBgP0REJ2k9TVghKCksbCltXkRkb1syXDxOWnQyNCpJKDs6dVZWVmgpOlAuSVchPXU3LWstZ1tlU1ZQSz9bTGlhPjMyPyNfIlBRKjlGNVtDU2RbXTxNPkhyaS5kLCVMT2ddX0FoXCs9anRnPmdudTdjLS4nLEhLaGdnXWUwKGMuImhmWj1XUiVqbT8mLD1kSEMqUzpIQWY0OE0iVCY9M01QMU5qTUZXWGkkaW9wa2BbOUZzQDckQFZBPSVHblo8aTtXSE5YZyI/Z15fT0R0QVYmaD8hMW1pQSkwRVIlcScjQ0pSTHVWVEo8KnFTXmosQikvZjZBUzpbIzkrMGgnLjhURFtAPiZcakQySSUrIlxjMk1xbFk8V2pCaTlGWjtPdT0qfj5lbmRzdHJlYW0KZW5kb2JqCjE0IDAgb2JqCjw8Ci9GaWx0ZXIgWyAvQVNDSUk4NURlY29kZSAvRmxhdGVEZWNvZGUgXSAvTGVuZ3RoIDIxMjcKPj4Kc3RyZWFtCkdhdG4nZ01ZZSkmO0taSi48c01NImlLcmpXYzFjbi1yOzErWkcjamhYSGV0WXAvR2I4SUpzLzA2dW9ZMGohNjtbNywjcyRCL2xGV0xRWjBMczVgcyldNF5LXFJfQVchMTkmcSZKUCFgZz5RO3VkZi4ubkpFNjl0QU4+RSgrWC5rYFhzMCtQQyYpMWQubyUoJ1IsUyklJmVwJEs+IldnWG9gLFdqXDJKQz9YWV5ucFJYakJyQnIubCVCM20ibWYhP0JeJWc4PSUncENyZzNGQUhzOF0qQnRPUHV1KDQ8KUtxRCdOYC5yW2JlPjRJXzAkNGInRV5TRlI3Pj9fZmpMRl0mPy9mcmwhQUBgcTs+MkpoZGE5PU4oRmJMZXBjOyguWDo3TFc6MGlgV0RDbzk4ZTlWX1wlQTxYa29SLz1SQCVjckZDZiFBOzQ3dWRnQyhwZzFqbV9kb2M+M29ubHVJMD5eYWpqV2YubExzRFVGQTJkbXAkSlZpWzNDSCgsKXAmIXIuPUtvL20/TkMlQmo4Uy9FTE00ckBGZVopQVdVVkRXQUtaQlIqJ1NbU20uJWc+LVEpZ0tJQk4vYWI8SEEnX2ApcVdrYFNXTisiOyhPaDUjTTRJTnUmVjFOInJNamBPMVtIL0FqUUNgPmM4UDwqSmZvQSkvUSQsYnNBY24yTEMwPV0hRU9KRVpsckhiXVJfZWY+WTAsbGEwJV8vIkMsKmMvcU5YWHE1LT5yLmMscU9YO042b3NtMFJmcj5GMHBhXE9QO19kOUcrWkBoJk1xYUpoZWNQc2BYKk9GYEAyKihjKEwwL0hUYFMmOF9OR29oVnBYQTRHRit1WWFTYkc4RURWX1RLNFI6Z2lRXG9zJGBSOy5oRVI+WzxbXy5bUUZSYHJiNipPamFrUGU8OyROVGNEQUdPdGVjcnFPWWdlJFI+aidHYFJrU29VWkY0c3FtZl8tYDBKLHRrZVVXTDVEI3JlLVk8Lm1lMmhpRWBiW1hyQy1WX2twcFxaWUEna21sanRkQkE9SlIyS1lqb0RgMSwyaEFrNUlBYmMvTiU7YVddOTg9MHUwcmREMUlGayYwOjQydTA3MkllSS07Tm08KlNQc2hobSh1TGstay9pNTtMSSxjNWxlWzQrKF5EUEFLVHRfbiNaJCVHTHUzZl5AJmBFTSw0XyJgM046P11tPzJiKnU9V1g5MC5tKExHJFdoJVlvSlMnI25TbkwtYz5uT1dmaVpjNnJxZHEiYitKVkApOFwyUWFOLlw7YllPXDtnU00uVkRaN1hFLFpuZG5Ra1dcSzpXKlF0LmQ8KEw0bztcMmUuYXUkKy0zXlk2SGlbJGw1InRRK1RDK0hVdCU5Z1xpWS85YEooRyNlOD5IRypQSU1KIltrZ2JUaClXSUxyNlBATkYlUypjVG0lQDxWM3JTVTpwQFZkMmVpLTpERF5cMDtOdTFPTzFPWnU+JlgyTD1CJ3RvWElwVlFNUG1nWkRBND1WMTA7dCJdRiVAMHFKKmBYRk1KLkxTRDBjVnNjJSwubFZvcl0scCEpdF5wJEk1amswclIiNmpebmNXSkw6a0BnXipgNXRQTmJFbGZsYSMrYDRXTV85ZFYsMC9aWjhPXmFrIUEuYDklK0shWy5sMF90TlBSMDZfJkA7NVc+PUdPS1wtak4xMjRrITE+PSw2PGhnOT9MKmRIRElwWkA4V0ZFKWBmck1QKidmXHJEaiRYJzkvP2BeczZvQzlfPEYqYG0taE5WNyg4ZlBiV3EnPE5wSmIrKFFIaVRTL0YkLFpYVlBEJl0sbGxPS3BDa2hGRFBRJ2x1c2tUMktRWmlATVZFSVBIbGBLS2s2aChrbmsmXCFAZmQuQ1oxK1pSU10mKSk8KEtSVCYxdUtlMGwhMTBmMFs0UkJAVEI7IlpSVywqckZEbTQmY1xIKW5BJ1IybUpcV0xdXU49QjtrPEgyNixvTkRPZXNPUVkoYVBRWD42bSQxRElCLDQqTC84ZTlTPSRpPTgkV0QtKGhlPTxqZURqP1xKOS9XKTNHZChBXCh0SkM6M01DPFY8PlMnRGEjMGJYPzNqLidiai9obC9wW0wnOWJhPCF1OS5ATGl1WlEkWCNxZmxTU0k7UnJmaGZVXVYzJyw7YyNLXD4iTDBIIURKXmZyWG5ZPXUnIUxxa1E5dW1NJXU1WlMzU2tLRz40UFhSJyhKPU1YOSY8RDtlV01WQV5la2NfWWtATzRPQlw8PVw7LyNEc1xsc3VZOD4lKEx0VmFKQ0xPQyJrbUA5NnJ1NVU/YktraCpiZDtebDpGIV8lYnQsR0xBKUFgXyZfQ1JZYFdAPm9kPktOOlo9PClUTGdWIS43UVlvTEdQMCtcVmMxOy48OTdFLkVtNmQ/OCFjRDhUbjV0IShMLylqUFUuZnJjXDxcZiJqUFlzdVhVYVI0SmBqM01kYkFrVD05O0pqdCkqRk5uQyhyLi4+QCowSlwlTGpPTkVFMidcNVArZ01yaE02NCkhVTQ9R2BCPlkzaStIakZNX3FFJ0s6L2NRZ0FrNFdPQHRvMVBqO0dkI103Oy9Ja0NMdVgqM1JUM0o7MjJNZ0NONypzNzNDI0UhbCVoT2gqRT5MPVZVJGhlayZCYl9UaXNqKlhwO0dgWTxuJTsoLk04ZFliR0tZUS1JR1UvIiIjTTE1V2BqIihbNjosS11QN2shMFZqLSE4LV82Rz9fWFByKWIoOmVHPCRZVV4jWi48bTltRkRQUkBBK2BmP01tOFxIWXRvaSolJms/bkdAMStmSkhOLXFBKz9WNlZwWWtjNEhkXTstYjAtWWIjXE5DbXRcXFl+PmVuZHN0cmVhbQplbmRvYmoKMTUgMCBvYmoKPDwKL0ZpbHRlciBbIC9BU0NJSTg1RGVjb2RlIC9GbGF0ZURlY29kZSBdIC9MZW5ndGggMjExNQo+PgpzdHJlYW0KR2F0JSRhYDg9WiZBQFpjcUMmc2JHZCU6XGQ1KCllYXNHXlJGYnVPKEE0U2UoJTd1Q0xpb0tGcyE2dFFdWGBpQm8rV2w6J2Y4XFdAUzE9SHNuU2JgWEg4RERMbWw1O1Fka0FXUztgK0c8UE5kbUtqLEMzcVZtO1QoO1tdY2dEODIrXkVPNUEtJCorTHFgTDFmKGQ8N2ZfPz1LXFZiL1lnYT1za1ZbOjpqc0NlITlSUnAwMmRcXiM/bVptc3NGOTw5cGJRZE0nUUVVYU1Tb2tRMGs7LS8oJzVMJC5NSF8qaytOOWlsRlcyUHVsclE3ZCY1Z1xrUW9TQ2RBT21LSD4iZElfIldjWTJLcCwhO1A2JWtzcWU7VFskTk4+Nk8vMihCYzooPWlzUUldUmA0JmtCKCVEN3MvJj1aMUUvUzRPc1dGRyo2NkNKbEdkR0kvJlsrZ282JT9eN00zcEVRUiIrMU50LEIwRWFBR1xLVE1fTFcyUFBIXkBVSDw4ZThnRC9uTTM0SWxFVV9PZjpObE1mb2Beal5ETEteYD1qLE9BdD5ZKyFvVikkVSdaVjVFW2YpWUNuIyJISj5qSy1kPE9eUWJVVyFrKGRLaTZEN09DdVN0K0slXnA3TDFASE9HNzttYklXVzVAcjtaRDRqayVxb040YmBAUjp0VjhrXztMVHBJbE9mdUxlRyFwT0FVIlZyQCMpZUVUXlpaMU08TmxXLGM/WSpQLGRhMj9ycXEzZDJLIjZzbmFeX0BRMTdXJWxTQTpPXGZVMF9xXFJXXnJAMSJgU09fLy5eMTBcYSJYPjE0I01eMWlWMT1FLz5bTD89JC5cZUMiSnVTNyEwJUJQYjFXbE0+WEtcT2JGTy5ORnFFUSdCT2k+QzFhQGA/VT0nXV87OFNBUl47UUNBQVJPSlIzYFp1TzI+cCdJMjouVVticDIjOWxaMlAmbm8mY1ZJQSEtTFxfUEVqaERNamVHU2kjQW5pZl5dTCgjcDJgVVVFbi9Ca2hESkd0a3A0cmZASzEhcmxKLmVNbThDWmVFYzc5ZklrI0lgI2opQ1VWRE4oVVE5TkhBOktmL1tjVnAoNE4kaW0xcEc0Ky8zLzVBNmVyKl8sajg4WUElP14oSCFkZlpzJXE5Zi8sUyJXT0k1JV1mZG9bXlMja2NWTE48OWgmX21aM2AnKnVeV3JZK3AkQlhOQCt0a25SXyNWUiZidTdcIzMmXkJxNkhrWENnKTNqZCwwY0sqXE0/YDpFPzs/aEYwW21pRVYiX2BVNzZfOVd0WWBsPjFjMDUhP007VDNSWW1TdUE0ZD1XUCxCMkA8XGNbNm5OVmJVU3ImUFFPbnBeQnU8UVA4VmhBMHFlYU5jK0hPWkFcX18naWhvQTBPVTtPOFEqO2hfY05HJGQ4OzIvZ0hyYWpEQUJIJDgiLlNxWmFZa0NRO0lZakBJWGhgLERGSyxNREgzQmAoITcwOzFNU1xCT206WjQ9PEE0LWdHY29vLWhKPWBUNmFmTWwiZkYmWG8uXjYhITw/KSQ8WUFzRDJzVSducFM5VChLQjk1NkVoWGhHQ0BWTmVtMioqa0RUIXNCKWBBMklFXU9bcyNDXTlBLW8rQ0M7XWEmUCU+OyknMSlaYSVuNSZKMVAoS0A1cTc6JEticjpwS3VpOWFPXVJCdUtpPFU7XiMyN09fcy1DUiN0IlxIRj1zWF1hWXBEMkFIXFNvJTE0SzlAZzMkJWtaaHMyVHE1SUdKMFsxRyYyTlEtO1FwXUhNLFkhQmZxJzciNlk/dDhlN0p1Nl4hcGBJNGQ2R1tmOUsvJ2FKVlVjW10qaE5XM2BVWjNYNnAxYVtxPWI2OjExVEgyLlE/amMyLEA6PCJlMkFTJ245VGBzMjQxZClVJFw3MlM+Y3QnUUlqaz5DRD5xN0M6Sz4kQyMqWGNhPFJoOi0mWyNYMURRVj5HM0MtQGRFNVZdVnFjRSlcSyc4RC5CKi05cDIhUUlRMUIvP0RGWkZOO0RLLkNdITFCZUMpY00xS2UzXDhPYEQxTy1xMVwjTEFUa2xgTjlIJiRqWzo0IjpHcFQ5LjJDNUhMbDpXW2ptJzFAdFlIXj5SPzs4RyZVLEhMUTsyT3QnZFlJX0MnQE9xU2ouMGwlaUFdcmksTmcsM1pVV0gnUGpMWF1YPCF1Sl5iL1BuYiZubEhfZT5oJCE5bFsoVVAsSFdCRj42Mkw1ciZZOF80JHE4LyxgMCoicFwxWHBKbHAuPkY6LjFXR1IqblVkLihCO0ZdJUE5RCM2ZzZQaVI7M0lOUF5ALzc7RlIxOEtqRy0nTkkkUSZYNWlcNFY7XjxPcjEwITYpTitNJFlXWzpWQUZLKVhpTl9XXFlxdFZaPlI/aSRiUTwxRk0vaHNSTFI8PTdNcDFGNldSLDIrRDo5USYuVmU+JUZhJCdbUThtTTdLPks3aF9PKTJLTUtqQ24hRyZJcW9cOXFqdFJUMWc1J2IxTDowZzxYJ0NJMnNbMWNfMTVeN1YrZVE4MVpmLXJsKGBjbEsodVFTV2BEL0dAUWNnJTguYCNUSEhyLl9PMy5YOiVmRkVpQmxpbVdiInBbaVQzMUA+J1whRkRzVG9wLEY9UWpkN2xdWDNOTVBsTCxQUEEsOkZxRyZbaSZRTk9FVElzSDlEUkZDTnQ/SCZdOWEiJjNxXW1fPTY+PkFjYSs9YiNTbSJARnByV2A+LSlwQk5Ha2tvc2g4OV44U1FPalFxRUlRJnNQVzxVakxWWWsyQjNzQmtfIjk7Pmk3VkRzU3BPQzgkR2MiLEVGam4sbV83MkVkSmpjUy9cX34+ZW5kc3RyZWFtCmVuZG9iagoxNiAwIG9iago8PAovRmlsdGVyIFsgL0FTQ0lJODVEZWNvZGUgL0ZsYXRlRGVjb2RlIF0gL0xlbmd0aCA0MTY5Cj4+CnN0cmVhbQpHYXUwRz1gWVAmJlVxZChRcSwsXClYbElmSVlgb2pXNU1cclNYPCpCb1doWicsYyNEKzMjb3VSNSE/TywjNy0uaCtnPjNfOD1zTWtTRjNSbjBlZlZZczMxOTxJXTpoQFwqRTk8N04mN0VoXmRgcD0xOkRvbGVAaEZAdWBHcnEiMVBCbi82Jy5OUzhjSVhpPyxgKW1pPF9XcEdfalxdbmtGVzpzWjhLL1dMSj5aMDBja0hyRFVNYXFsJj5qRSJkQE4qXWJVTkZzc151O1Z1JWQhTjY0S0ZEWWMjX1Q+bylMYCJQN1ZrUUQvMypnWEw9KmFsPzkuNXJHXFVpZzZnQzlwWnAoQV5SRiYmR0pqLE1sTG1JLXA4Y1RVKGltJmtfJ2BvTSYkVl9LVXNjMmJlQ2B1NFhPNWUkXztdUjhuSzZTMVhrXWBGb3Q6MStITCU8W21jT0lPOXFfKEJDWlZCJUgxRFY0WFU+ViZpTkdHRD9pRSs4NjJfVU84JXRmOC87WHE1ViRbXkxRUVw1Pi9edDQ2Lk1dImphSihVP1EwYyVsIikrLWQxRj1HMFNQZmkxO19acDk7ZS1qNUZJTzJwZkUvOlFLN1JQUkAnKEtaIl8jQ2doMVcpVGw0aCZgIy8hXl5IZHJNJmVNMmgnIzgmWjBnP108QiEwWS9cZWVLRTNDbSkiLk9ePDliZkwhUEg+OE9FLD1OSV1NPkEiZjUobydRTzwzcG4lJ2FaVVNaNUJXKyphZ2k6WDpcc11GczU7N08wZG0jUjNlblRXPig2QjtGJlhuJjUqUm5HLUdpQ0JKITFZPCJUMm9AOEFXK2NRXCNuMigiNV1ZX2JNRmMmcnBDbEpPQ09QMFFlb00/U1IzJj1YZmwrayJdaC4pXmNsPFJSIlJyPjVXJDxNQ09ZL280W1ddZWRCJy1DLyVzM2s0K2tqcGckK00hZUFzPSNXPzIkLDQsUzo2c1JzbURZK0EmJCI+SmRVJig/SFFCVXExYFtAQTw7KjlkOkdgajxlTVB0X1lkKkUnP0phImA1PDh0PTlKJjw1U2FaOFg1OzEvXGw+QSNzKzZzWz5vNEdfbmJdaGxUaD50OGNiTzMqbmxNTDhGSVBMMU0iaiRUOkBeZkxAcy02KmM8T1owY2htc0BbL14vdTo8YiU+Q1g+ZFxwMmFzZGY5Y1FqWGFaIkJaOWllYUNILF5XVFhzPTQ5T1wsV2YoOy82V15vJyVkL19MTDMzMnBVYnFgbFJIVkROYiVBcVhSLDlxQCtRJidgRT1lY2RxMzRfdCwsTGxlM3UrXDVTPGAjTV9gb0VaVEtcbEMxa1RvYkRZVzFLXkApVnEyT1JTRl1HR15zMz46YSY9OWJwJnI/TzcsaFFkOlYwW1RBXChgRmxObj9qXWNSQTRDJVU5UnFdTE0oN1gzYD0kclwuazdEO1piK1BzXGQwQUBFZlZ0Tm0pN0s7KigkT0E7NGZSIklbOHJqYF09WUFSTENhOjRZJ1dXMDU/X1dvXjZwcmplR24qc0Y+TF10RV4vRmpgVFIhXWJuPixCUyJVKTUtVkpuLXJfVUF0YS0tPlBvdSRMWEI5QmBbMko3cl9VITs7WVZYdGxMLVYhXl0sXExDI0xpL2RvbS9yWkBVQnRidGRdZ1F1Iy5DOyExM3JJLHImcjsqMEpjKE8lcVVBVkBBWyEzVVc+RkEqTjhyJGs9X14oITdxNCVBUDFZQ0hycGhtXkIwPiVxbyxfTT5IPDUjTkQ4aU1ANUVCdG4lM2UlaVM2T2EmKFxWNF1qUkU1MXBhSFdeRT88SlIvKl5EKk40Qzs0TGtJKk06NlJxXWM0Q3BwcT8hO2gvWlVgTCZKVDwzXUNmZilYQGdyQ2MrSVghSmJNYmk7bVJDbXQoNmxPTmI8NkleP2NDcE9oYEhDLF1zcG8yVzdbMm4uRnI/U10pXUxMNi50LWQ7TCFEUGMoKWdqWE9wLUZPaEBSWzpUKXF0PSdNJVJTTE1kKEVla243TVFXIXIxVCM9SSZUalxxO29QSzhCXlA+LTdmNSQvV041MSg/Jl5wQEU5JmQrSW8jJzhhaVskbTVgZUtaI3RzKzwxdClfQkhkLDMkWWVpIkJtMm1qMjxjQEA6JzlHVldSKFAmRSkpWkktL1BLSk5vQVVucEgpcjpFcCIhQmdjRGUqMDtpbytCVGQzUD5QZC0wbFMwRS9ZJm9caj9YaC4/bDApSTg6YSsuJkBnWExpX3Q4QjpqMVAtTy9tRWNLZ0JxSDAiXFNVXER1IzVuRmEkYVlaUGhhXEpfc2dbJigwMkorIztvXDdMNTUyQlUjL0JoRXM6cyM0W0xraigxcTVoaT4+S2InL2ZWOTUrbW5FbiNoKyJgMz1SQVgtKF48QzVONTVwQiM/aGEvKWJ1RkQkI1dgZyVSWURkXTVROm1tXzVRW2xETF0yWGtnWjVRMSVCQFJlKE4nVDVeW05FLllXbyMwT18yOFRrQ2c8UU9nP29TU3BXI18nVFVdcFRjODZZQ09uRk9GI0ZGKTIkdD9MOy9bKTZeWSEuajhmST8nSCNlM1VVU2A+WCdMRE5sazxmY0VeJHFsSlEjcjFzMFAlRU0obz8jLlYsMlVlTUddVypRajtAIltWNEVLUERXIykkUHBsK3A4O1FhZk9VZzw+ZFY7MUd0LkhDQ10iIUJjLlNmWkNdb2lZLlM9YjNCbDU4SiVQUlZxVz9QcW9TMVxVM1UkbEJSaSFML11BRTdOcSlfSUswVkwmPGhRWWhaaEN1JCdaZnAjIXJHa24hImU2bCZGc2c7K0M2bGszOSEqLTxKX0NOOkBsYS5XIUNNaSRbWzw+VyJvL2ZLYnI/NCwjYydOaGAjNEJJcGtGTVg/YW8mXkBWJT5dMUxUSDJsUEwoSUEkUSx0P0ooLmZAWzdxak1PNTlVOD45bylXV0UnVytMSDQrJjM8MTFkR050VG9zPG4qZ0EsR3FSMUFBTW5vQlhwblg6KnI6MShJLmJpZWhHZ3BzNU9bQ04pcTBedV8oUTAmYSk9XE5zJWtcUydzQFIhMSVBSXNjZT46V2Fqa2IjMXFLZDh1XT9bN1ljUW0tQWIjIlRAcDIkPCJMST5HW1tBLzI0VURjImxFSixTX2VsMXNxaW06MVBKaUVVNDAmR1p1Ym1GN3FiYGc4ajxiK3BfR1RhWW4rOXFkT2pnaVxANzNHRy9sYEAqTnRaVEk/JyY8UlhHMFRtXTxVNWVGdC0jPTYoX051YjlmWGllMjhOWFcsT3I4UTxRWTJRYUYvayRVQDIqXlMvRlQ9Y29aWlZAbmMyMVEjKyFBMmRpM0VRTSVHXHVeYkFZM001IVQ8NypOYiY+L2Y/a1VhLG9SMF1wP11aMSIyaSMsZFFARDNLdWtqcVpyRFFsbTNeUW0wWydsSyFtbFRTNTVFKjA6UTwmVWJQMSxhUVNcT3AmPHQzKCZaLTM6WWArODg+LGNAJFpaXTZfSVpnV2NDQlZCVlFbY0Y5TF1nWUsnTU8sZEIzIS9OKzMhNGQwITpYUDNsKzZQOWI4PFk1RFYqU2YwPWVfSz0iT2g9I11MYlZeOyFOOGBAJDhgYGxnKzZuQEBRSnNUYDlJbnJacExoRyhSMCUmaDhPJyhXU2M3PixjdSNYKG9yZVslU2pqWzJENmdQPlg0NCcwLytVUkxsPSRCRT9tZ2FDWGc/MUA/VjY5U2xBInJeMFFVcTZwQW1DJ2JQQiQwXSg8bSU9TWY/NGU7YyQ5WWRdai9QbHVaKiEoViFTNEY0MVAxNT5FUD5TXUVJNmdGcGhIYyg8YzdYWzMtajsqRltjWk1cNkM9UF9gLyM3SHE4MUBxLWtXWiFeRjFQTWpwOTohUD9DR1gvYC1WNixtX1xZLmtIOU4jakVaNjxLKCg3K1FOY2piczQuOkJuYm5ZI2NLZE9LJGlLOTg2cTxYaSJXOTVIT3RRTmpaSF9PXFVpLypEJ2M9OiorNjo1SlUrJ3BCNUZXdWtRcWo2X1EvYlI9OnVpWVQtK24nJ3QwUVA5SXIocj9RJC9cJDQnaC8yLlNWJTNIRk9jWEM7alYzZGBBUyZJQiVPJTNyOSIlWCUxMTEqOSRrXUVlZ3JvPihecUsubVdYOF0iVCkyRyszWTwkPS48ViZbKmorXGlYJjMxIU5SWmwtYnBBLEUsZztOaHBVLTdUUy0uVUI4KDdPU0N1OzRwR21gZmVoa11aREwqNlk7T0wsTmdcdS10ZEp1UDZmLlpuISMsbCs9N0J1MHI+LUMkQ1ArVF5nYz9rIU1QMEdERSRcWzZBX1NQcnRdNV0pZHMvWjxxJlphLGI3bipZWHE5PidpNkxgVypHRGpnKmsjRio/aHVXbFomLkE4TEFudGc7UlRDbExpLE9BLm42TiRWWl1pNygxQCImUylOSkFgUCszJT43OC1UaUZKbyxgKitrMnBpSzZkKUMkQSJlIy9eTDdJb1ssM2FiXU9sW2tRYU0zWidNNkU9czhPREMzI2NyY0RnR2FnKj5KLyNgZC9ZYUJXaD5rOV9EcmN1LCJbcUdnOEwkMV9EV1JXRywoXj9tazJSLitzVWBhTU1PNiUoaWE8SyhlakFnKi0ublg/QTNKZU9yMGwwMExoMEs4SkZuSS1Yb2hPZDQyR2wsVFpdKTBqWmxQJHIudV5AcylJazU5TGBbLGRBSzNvTygiYmRqLFAnWSMoNDkiZTNNaSEhNzVNYDdQQipFVjM/cGdPUCpVKDtwP2IrQEljM1ozYGJ1Ik0oMXJKbT9ZPyZyY2YyOCpaOHVAWjw6Km9oNnRjP0I3KWpRWj9kXGJhNypvVHVCKTAiaC1hNV1QbGpzIlZKai5bIy50PCxWXydSUExPJWFdQW4rSixmbkpOYWZHc2E4TS48LCRuIlVXXXQ1LGZSLUNwTDkraFVZNnBOVmdncXRTamZdWWFmTF5lIzAwYT9gbCZddD5FJ0xgWCZPW2EyWCVRNFZKMkIpZj9xMCIyZmlHPiNZLk5FO1swXFkkaTBwKDJOM1NfZ11dRio+RCxWYWxPQCMxT0ZKZ2NlWDo7aVdcVS9iX2A4VUJVVmA+SV5cbUpsRUQkJzN1M0gkRypwbVQpS1xZQWVSVWo3VUFFYS1aayleJzovRVFYXjo3UVheTjBIPCNZUThxUyIyWyphYWFca0sxaTslVCgoOVVgLDRNTC4kKDJodW1qVEhaSWskYTVfVTYkL0JOSUEqXWZGOS4oPVx0c3VpTFYpaFxURm1OITlWZCUwJHJybyZLVDxBVyRrRCREYVJfKCZRckdeZU1UW10sUS0xazo1NylaLEMoMSxVVGpBbF5wVVBjbVZbT29rXSUtMkczclA3LEBKUlFiQFgiT0dlVzklYEdZO1gxPyc7YU41UDQ5bDFOMEAzaUpIQj5YNEhoSEk3Nm9HKT5NKTxuK1ZiNVZWQSYxX2UuQExiSDRcO1ZuNTduRTJCMUorNlxAWF1CS0FycSMlPCluUmdYbUxYITlhRGhjMEUwTExfTzJWL2U8JWBMWDBfNFs3cSspPkhzIzZ+PmVuZHN0cmVhbQplbmRvYmoKeHJlZgowIDE3CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDA2MSAwMDAwMCBuIAowMDAwMDAwMTIyIDAwMDAwIG4gCjAwMDAwMDAyMjkgMDAwMDAgbiAKMDAwMDAwMDM0MSAwMDAwMCBuIAowMDAwMDAwNTQ2IDAwMDAwIG4gCjAwMDAwMDA3NTEgMDAwMDAgbiAKMDAwMDAwMDgzNCAwMDAwMCBuIAowMDAwMDAxMDM5IDAwMDAwIG4gCjAwMDAwMDExMTYgMDAwMDAgbiAKMDAwMDAwMTMyMSAwMDAwMCBuIAowMDAwMDAxMzkxIDAwMDAwIG4gCjAwMDAwMDE2NzYgMDAwMDAgbiAKMDAwMDAwMTc1NCAwMDAwMCBuIAowMDAwMDAzMjYyIDAwMDAwIG4gCjAwMDAwMDU0ODEgMDAwMDAgbiAKMDAwMDAwNzY4OCAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9JRCAKWzw5Mzg4MTQxZTY3NmFmZDlmOGI4OTk4ZmFkMzY1YzNiNj48OTM4ODE0MWU2NzZhZmQ5ZjhiODk5OGZhZDM2NWMzYjY+XQolIFJlcG9ydExhYiBnZW5lcmF0ZWQgUERGIGRvY3VtZW50IC0tIGRpZ2VzdCAob3BlbnNvdXJjZSkKCi9JbmZvIDExIDAgUgovUm9vdCAxMCAwIFIKL1NpemUgMTcKPj4Kc3RhcnR4cmVmCjExOTQ5CiUlRU9GCg==";
+    function downloadPDF() {
+      const link = document.createElement('a');
+      link.href = 'data:application/pdf;base64,' + PDF_B64;
+      link.download = 'framework-ia-oportunidades.pdf';
+      link.click();
+    }
+  </script>
+</body>
+</html>
