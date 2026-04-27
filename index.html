@@ -755,66 +755,16 @@
   <div class="step" id="step-3">
     <div class="step-tag"><span class="dot"></span>Paso 3 de 3</div>
     <h2 class="step-title">Diagnóstico</h2>
-    <p class="step-subtitle">Analiza las situaciones candidatas. Empieza por las que están en la zona de alta frecuencia y energía negativa.</p>
+    <p class="step-subtitle">Analiza cada situación candidata. Cambia entre ellas sin perder los datos — todo se guarda.</p>
 
     <!-- Task selector -->
     <div class="diagnosis-selector">
       <label>Situación a analizar</label>
-      <select id="diagnosisSelect" onchange="loadDiagnosis()">
-      </select>
+      <select id="diagnosisSelect" onchange="loadDiagnosis()"></select>
     </div>
 
-    <!-- Filter -->
-    <div class="filter-card" id="filterCard">
-      <div class="filter-title">Filtro de idoneidad</div>
-      <div class="filter-subtitle">Responde sí o no a cada pregunta sobre esta situación</div>
-
-      <div class="filter-question">
-        <p>¿Se repite de forma parecida cada vez que la haces?</p>
-        <div class="toggle-group">
-          <button class="toggle-btn yes" onclick="toggleFilter(this, 'f1', true)">Sí</button>
-          <button class="toggle-btn no" onclick="toggleFilter(this, 'f1', false)">No</button>
-        </div>
-      </div>
-      <div class="filter-question">
-        <p>¿Tiene un resultado claro y verificable?</p>
-        <div class="toggle-group">
-          <button class="toggle-btn yes" onclick="toggleFilter(this, 'f2', true)">Sí</button>
-          <button class="toggle-btn no" onclick="toggleFilter(this, 'f2', false)">No</button>
-        </div>
-      </div>
-      <div class="filter-question">
-        <p>¿Sabes exactamente qué información necesitas para empezar y qué tiene que producir cuando terminas?</p>
-        <div class="toggle-group">
-          <button class="toggle-btn yes" onclick="toggleFilter(this, 'f3', true)">Sí</button>
-          <button class="toggle-btn no" onclick="toggleFilter(this, 'f3', false)">No</button>
-        </div>
-      </div>
-
-      <div class="idoneity-result" id="idoneityResult"></div>
-    </div>
-
-    <!-- Anatomy -->
-    <div class="anatomy-card" id="anatomyCard">
-      <div class="anatomy-title">Anatomía de la tarea</div>
-      <div class="anatomy-subtitle">Desglosa el proceso y marca la energía que te genera cada paso</div>
-
-      <div style="margin-bottom:20px;">
-        <div style="font-size:12px; font-weight:500; letter-spacing:0.8px; text-transform:uppercase; color:var(--gray-400); margin-bottom:10px;">¿Qué entra?</div>
-        <textarea id="anatomy-in" placeholder="¿Qué información o material necesitas para empezar?" style="min-height:60px;"></textarea>
-      </div>
-
-      <div style="margin-bottom:20px;">
-        <div style="font-size:12px; font-weight:500; letter-spacing:0.8px; text-transform:uppercase; color:var(--gray-400); margin-bottom:10px;">¿Qué haces? <span style="font-weight:400; text-transform:none; letter-spacing:0; font-size:11px; color:var(--gray-400);">— marca la energía de cada paso</span></div>
-        <div id="stepsContainer"></div>
-        <button class="add-step-btn" onclick="addStep()">+ Añadir paso</button>
-      </div>
-
-      <div>
-        <div style="font-size:12px; font-weight:500; letter-spacing:0.8px; text-transform:uppercase; color:var(--gray-400); margin-bottom:10px;">¿Qué sale?</div>
-        <textarea id="anatomy-out" placeholder="¿Cuál es el resultado final?" style="min-height:60px;"></textarea>
-      </div>
-    </div>
+    <!-- Dynamic diagnosis area -->
+    <div id="diagnosisArea"></div>
 
     <div style="display:flex; flex-wrap:wrap;">
       <button class="btn-secondary" onclick="goTo('step-2')">← Atrás</button>
@@ -830,7 +780,7 @@
       <p class="final-subtitle">Estos son los pasos concretos donde la IA puede entrar<br>sin tocar lo que ya funciona bien.</p>
     </div>
     <div id="resultsContainer"></div>
-    <button class="btn-primary" onclick="restart()" style="margin-top:8px;">Empezar de nuevo</button>
+    <button class="btn-secondary" onclick="goTo('step-3')">← Atrás</button><button class="btn-primary" onclick="restart()" style="margin-top:8px;">Empezar de nuevo</button>
     <div style="margin-top:12px;">
       <button onclick="downloadPDF()" style="display:inline-flex;align-items:center;gap:8px;background:transparent;border:1.5px solid var(--gray-200);border-radius:100px;padding:12px 24px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--gray-600);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--gray-200)';this.style.color='var(--gray-600)'">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -849,6 +799,7 @@ const state = {
   mapPoints: {},
   filters: {},
   anatomy: {},
+  diagnosisData: {},
   selectedItem: null,
   pendingMapItem: null
 };
@@ -996,87 +947,159 @@ function goToDiagnosis() {
     sel.appendChild(opt);
   });
 
-  // Init steps
-  initSteps();
-  resetFilters();
+  // Init diagnosis area
+  const firstIdx = sel.options[0]?.value || '0';
+  if (!state.diagnosisData[firstIdx]) state.diagnosisData[firstIdx] = { filters:{}, anatomyIn:'', anatomyOut:'', steps:[] };
+  renderDiagnosisArea(firstIdx);
   goTo('step-3');
 }
 
-function loadDiagnosis() {
-  resetFilters();
-  initSteps();
+const FILTER_QUESTIONS = [
+  { key: 'f1', text: '¿Se repite de forma parecida cada vez que la haces?' },
+  { key: 'f2', text: '¿Tiene un resultado claro y verificable?' },
+  { key: 'f3', text: '¿Sabes exactamente qué información necesitas para empezar y qué tiene que producir cuando terminas?' }
+];
+
+function renderDiagnosisArea(idx) {
+  const data = state.diagnosisData[idx] || { filters: {}, anatomyIn: '', anatomyOut: '', steps: [] };
+  const area = document.getElementById('diagnosisArea');
+
+  area.innerHTML = `
+    <div class="filter-card">
+      <div class="filter-title">Filtro de idoneidad</div>
+      <div class="filter-subtitle">Responde sí o no a cada pregunta sobre esta situación</div>
+      ${FILTER_QUESTIONS.map(q => `
+        <div class="filter-question">
+          <p>${q.text}</p>
+          <div class="toggle-group">
+            <button class="toggle-btn yes ${data.filters[q.key] === true ? 'active' : ''}" onclick="toggleFilter(this,'${idx}','${q.key}',true)">Sí</button>
+            <button class="toggle-btn no ${data.filters[q.key] === false ? 'active' : ''}" onclick="toggleFilter(this,'${idx}','${q.key}',false)">No</button>
+          </div>
+        </div>`).join('')}
+      <div class="idoneity-result ${getIdoneityClass(data.filters)}" id="idoneityResult">${getIdoneityText(data.filters)}</div>
+    </div>
+
+    <div class="anatomy-card">
+      <div class="anatomy-title">Anatomía de la tarea</div>
+      <div class="anatomy-subtitle">Desglosa el proceso paso a paso y etiqueta cada uno: <strong>⚡ te da energía / te motiva</strong> &nbsp;·&nbsp; <strong>➡️ neutro</strong> &nbsp;·&nbsp; <strong>🔋 te quita energía / te pesa</strong></div>
+
+      <div style="margin-bottom:20px;">
+        <div style="font-size:12px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;color:var(--gray-400);margin-bottom:10px;">¿Qué entra?</div>
+        <textarea id="anatomy-in-${idx}" placeholder="¿Qué información o material necesitas para empezar?" style="min-height:60px;" oninput="saveField('${idx}','anatomyIn',this.value)">${data.anatomyIn || ''}</textarea>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <div style="font-size:12px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;color:var(--gray-400);margin-bottom:10px;">¿Qué haces? <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--gray-400);">— marca la energía de cada paso</span></div>
+        <div id="stepsContainer-${idx}"></div>
+        <button class="add-step-btn" onclick="addStep('${idx}')">+ Añadir paso</button>
+      </div>
+
+      <div>
+        <div style="font-size:12px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;color:var(--gray-400);margin-bottom:10px;">¿Qué sale?</div>
+        <textarea id="anatomy-out-${idx}" placeholder="¿Cuál es el resultado final?" style="min-height:60px;" oninput="saveField('${idx}','anatomyOut',this.value)">${data.anatomyOut || ''}</textarea>
+      </div>
+    </div>
+  `;
+
+  // Render steps
+  const container = document.getElementById(`stepsContainer-${idx}`);
+  const steps = data.steps.length > 0 ? data.steps : [{text:'',energy:''},{text:'',energy:''},{text:'',energy:''}];
+  steps.forEach((s, si) => renderStep(idx, si, s));
 }
 
-function resetFilters() {
-  state.filters = {};
-  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('idoneityResult').className = 'idoneity-result';
-  document.getElementById('idoneityResult').textContent = '';
-}
-
-function toggleFilter(btn, key, val) {
-  const group = btn.closest('.toggle-group');
-  group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  state.filters[key] = val;
-  evaluateFilter();
-}
-
-function evaluateFilter() {
-  const vals = Object.values(state.filters);
-  if (vals.length < 3) return;
-  const yeses = vals.filter(v => v).length;
-  const result = document.getElementById('idoneityResult');
-  if (yeses >= 2) {
-    result.className = 'idoneity-result good';
-    result.textContent = '✓ Buena candidata para explorar con IA. Continúa con la anatomía.';
-  } else {
-    result.className = 'idoneity-result bad';
-    result.textContent = '✗ Esta situación puede no ser la más adecuada ahora. Prueba con la siguiente del mapa.';
-  }
-}
-
-function initSteps() {
-  const container = document.getElementById('stepsContainer');
-  container.innerHTML = '';
-  addStep();
-  addStep();
-  addStep();
-  document.getElementById('anatomy-in').value = '';
-  document.getElementById('anatomy-out').value = '';
-}
-
-function addStep() {
-  const container = document.getElementById('stepsContainer');
+function renderStep(idx, si, s) {
+  const container = document.getElementById(`stepsContainer-${idx}`);
   const row = document.createElement('div');
   row.className = 'step-row';
+  row.dataset.si = si;
   row.innerHTML = `
-    <input class="step-input" type="text" placeholder="Describe este paso...">
-    <select class="energy-select" title="Energía">
-      <option value="">·</option>
-      <option value="positive">⚡</option>
-      <option value="neutral">➡️</option>
-      <option value="negative">🔋</option>
+    <input class="step-input" type="text" placeholder="Describe este paso..." value="${s.text || ''}" oninput="saveStep('${idx}',${si},'text',this.value)">
+    <select class="energy-select" title="Energía" onchange="saveStep('${idx}',${si},'energy',this.value)">
+      <option value="" ${!s.energy?'selected':''}>·</option>
+      <option value="positive" ${s.energy==='positive'?'selected':''}>⚡</option>
+      <option value="neutral" ${s.energy==='neutral'?'selected':''}>➡️</option>
+      <option value="negative" ${s.energy==='negative'?'selected':''}>🔋</option>
     </select>
-    <button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--gray-400);padding:4px;">×</button>
+    <button onclick="removeStep('${idx}',this)" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--gray-400);padding:4px;">×</button>
   `;
   container.appendChild(row);
 }
 
+function addStep(idx) {
+  if (!state.diagnosisData[idx]) state.diagnosisData[idx] = { filters:{}, anatomyIn:'', anatomyOut:'', steps:[] };
+  const si = state.diagnosisData[idx].steps.length;
+  state.diagnosisData[idx].steps.push({ text:'', energy:'' });
+  renderStep(idx, si, { text:'', energy:'' });
+}
+
+function removeStep(idx, btn) {
+  const row = btn.parentElement;
+  const si = parseInt(row.dataset.si);
+  state.diagnosisData[idx].steps.splice(si, 1);
+  // Re-render all steps
+  const container = document.getElementById(`stepsContainer-${idx}`);
+  container.innerHTML = '';
+  state.diagnosisData[idx].steps.forEach((s, i) => renderStep(idx, i, s));
+}
+
+function saveStep(idx, si, field, val) {
+  if (!state.diagnosisData[idx]) return;
+  if (!state.diagnosisData[idx].steps[si]) state.diagnosisData[idx].steps[si] = {};
+  state.diagnosisData[idx].steps[si][field] = val;
+}
+
+function saveField(idx, field, val) {
+  if (!state.diagnosisData[idx]) state.diagnosisData[idx] = { filters:{}, anatomyIn:'', anatomyOut:'', steps:[] };
+  state.diagnosisData[idx][field] = val;
+}
+
+function toggleFilter(btn, idx, key, val) {
+  const group = btn.closest('.toggle-group');
+  group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (!state.diagnosisData[idx]) state.diagnosisData[idx] = { filters:{}, anatomyIn:'', anatomyOut:'', steps:[] };
+  state.diagnosisData[idx].filters[key] = val;
+  const filters = state.diagnosisData[idx].filters;
+  const result = document.getElementById('idoneityResult');
+  if (result) {
+    result.className = 'idoneity-result ' + getIdoneityClass(filters);
+    result.textContent = getIdoneityText(filters);
+  }
+}
+
+function getIdoneityClass(filters) {
+  const vals = Object.values(filters);
+  if (vals.length < 3) return '';
+  return vals.filter(v => v).length >= 2 ? 'good' : 'bad';
+}
+
+function getIdoneityText(filters) {
+  const vals = Object.values(filters);
+  if (vals.length < 3) return '';
+  return vals.filter(v => v).length >= 2
+    ? '✓ Buena candidata para explorar con IA. Continúa con la anatomía.'
+    : '✗ Esta situación puede no ser la más adecuada ahora. Prueba con la siguiente del mapa.';
+}
+
+function loadDiagnosis() {
+  const idx = document.getElementById('diagnosisSelect').value;
+  if (!state.diagnosisData[idx]) state.diagnosisData[idx] = { filters:{}, anatomyIn:'', anatomyOut:'', steps:[] };
+  renderDiagnosisArea(idx);
+}
+
 // Results
 function goToResults() {
-  // Collect drain steps
-  const stepRows = document.querySelectorAll('#stepsContainer .step-row');
-  const selectedTask = document.getElementById('diagnosisSelect');
-  const taskName = selectedTask ? selectedTask.options[selectedTask.selectedIndex]?.text : 'Tarea';
-
+  // Save current diagnosis first
+  const sel = document.getElementById('diagnosisSelect');
   const opportunities = [];
-  stepRows.forEach(row => {
-    const input = row.querySelector('.step-input');
-    const energy = row.querySelector('.energy-select');
-    if (input?.value && energy?.value === 'negative') {
-      opportunities.push({ task: taskName, step: input.value });
-    }
+  Object.entries(state.diagnosisData).forEach(([idx, data]) => {
+    const opt = Array.from(sel.options).find(o => o.value === idx);
+    const taskName = opt ? opt.text : 'Tarea';
+    (data.steps || []).forEach(s => {
+      if (s.text && s.energy === 'negative') {
+        opportunities.push({ task: taskName, step: s.text });
+      }
+    });
   });
 
   const container = document.getElementById('resultsContainer');
@@ -1108,6 +1131,7 @@ function restart() {
   state.items = [];
   state.mapPoints = {};
   state.filters = {};
+  state.diagnosisData = {};
   state.pendingMapItem = null;
   document.getElementById('q1').value = '';
   document.getElementById('q2').value = '';
